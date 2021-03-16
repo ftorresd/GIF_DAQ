@@ -18,7 +18,7 @@
 #ifndef _v1190a_h
 #define _v1190a_h
 
-#include "CAENVMEtypes.h"
+// #include "CAENVMEtypes.h"
 #include "utils.h"
 #include "IniFile.h"
 #include "v1718.h"
@@ -158,7 +158,7 @@ typedef enum _TRIGGER_DEFAULT_SETTINGS_V1190A{
     TRIG_REJ_MARGIN_V1190A  = 0x04  /* Default reject margin */
 } TRIGGER_DEFAULT_SETTINGS_V1190A;
 
-const Uint MAXTRIGGERS_V1190A = 1000;
+const Uint MAXTRIGGERS = 1000;
 const Uint TIMEOUT = 100000;
 const Uint BLOCK_SIZE = 100;
 const Uint IRQ_BUFFER = 4096;

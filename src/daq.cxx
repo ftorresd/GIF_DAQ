@@ -9,11 +9,14 @@
 #include "../include/MsgSvc.h"
 #include <limits>
 #include <fstream>
+#include <iostream>
+
 
 using namespace std;
 
 int main (int argc ,char *argv[])
 {
+
     //The program needs 2 arguments to run : its own name and the path to the
     //log file that is written inside the log file in the RUN directory. The
     //will then be used by the MSG functions to know where to write the logs.
@@ -26,6 +29,9 @@ int main (int argc ,char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    MSG_INFO("****************************************************");
+    MSG_INFO("**************    IPBus Version    *****************");
+    MSG_INFO("****************************************************");
     MSG_INFO("                                                    ");
     MSG_INFO("                                                    ");
     MSG_INFO("                                                    ");
@@ -45,7 +51,7 @@ int main (int argc ,char *argv[])
     MSG_INFO("                                                    ");
     MSG_INFO("                                                    ");
     MSG_INFO("****************************************************");
-    MSG_INFO("******    DAQ Program 16/11/17 Version 4.0    ******");
+    MSG_INFO("******    DAQ Program 16/03/21 Version 5.0    ******");
     MSG_INFO("****************************************************");
 
     DataReader *DR = new DataReader();

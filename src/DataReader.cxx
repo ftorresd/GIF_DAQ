@@ -56,7 +56,7 @@ void DataReader::SetIniFile(string inifilename){
 // ****************************************************************************************************
 
 void DataReader::SetMaxTriggers(){
-    MaxTriggers = iniFile->intType("General","MaxTriggers",MAXTRIGGERS_V1190A);
+    MaxTriggers = iniFile->intType("General","MaxTriggers",MAXTRIGGERS);
 }
 
 // ****************************************************************************************************
@@ -68,17 +68,17 @@ Data32 DataReader::GetMaxTriggers(){
 // ****************************************************************************************************
 
 void DataReader::SetVME(){
-    VME = new v1718(iniFile);
+    // VME = new v1718(iniFile);
 }
 
 // ****************************************************************************************************
 
 void DataReader::SetTDC(){
     nTDCs = iniFile->intType("General","Tdcs",MINNTDC);
-    TDCs = new v1190a(VME->GetHandle(),iniFile,nTDCs);
+    // TDCs = new v1190a(VME->GetHandle(),iniFile,nTDCs);
 
-    /*********** initialize the TDC 1190a ***************************/
-    TDCs->Set(iniFile,nTDCs);
+    // /*********** initialize the TDC 1190a ***************************/
+    // TDCs->Set(iniFile,nTDCs);
 }
 
 // ****************************************************************************************************
@@ -119,9 +119,9 @@ void DataReader::Update(){
 // ****************************************************************************************************
 
 void DataReader::FlushBuffer(){
-    VME->SendBUSY(ON);
-    TDCs->Clear(nTDCs);
-    VME->SendBUSY(OFF);
+    // VME->SendBUSY(ON);
+    // TDCs->Clear(nTDCs);
+    // VME->SendBUSY(OFF);
 }
 
 // ****************************************************************************************************
@@ -224,7 +224,7 @@ void DataReader::Run(){
     FlushBuffer();
     TString runtype = iniFile->stringType("General","RunType","");
     if(runtype == "rate" || runtype == "noise_reference" || runtype == "test"){
-        VME->RDMTriggerPulse(ON);
+        // VME->RDMTriggerPulse(ON);
         MSG_INFO("[DAQ] Run is of type "+(string)runtype+" - starting random trigger pulses");
     }
 
@@ -246,28 +246,28 @@ void DataReader::Run(){
         //If there is data, an interupt request is present
         usleep(CHECKIRQPERIOD);
 
-        if(VME->CheckIRQ()){
-            //Stop data acquisition with BUSY as VETO (the rising time of
-            //the signal is of the order of 1ms)
-            VME->SendBUSY(ON);
+        // if(VME->CheckIRQ()){
+        //     //Stop data acquisition with BUSY as VETO (the rising time of
+        //     //the signal is of the order of  1ms)
+        //     VME->SendBUSY(ON);
 
-            //Read the data
-            TriggerCount = TDCs->Read(&TDCData,nTDCs);
+        //     //Read the data
+        //     TriggerCount = TDCs->Read(&TDCData,nTDCs);
 
-            //percentage update
-            percentage = (100*TriggerCount) / GetMaxTriggers();
+        //     //percentage update
+        //     percentage = (100*TriggerCount) / GetMaxTriggers();
 
-            //dump the status in the logfile every 5%
-            if(percentage != 0 && percentage % 5 == 0 && percentage != last_print){
-                string log_percent = intTostring(percentage);
+        //     //dump the status in the logfile every 5%
+        //     if(percentage != 0 && percentage % 5 == 0 && percentage != last_print){
+        //         string log_percent = intTostring(percentage);
 
-                MSG_INFO("[DAQ] Run "+outputFileName+" "+log_percent+"%");
-                last_print = percentage;
-            }
+        //         MSG_INFO("[DAQ] Run "+outputFileName+" "+log_percent+"%");
+        //         last_print = percentage;
+        //     }
 
-            //Resume data taking - Release VETO signal
-            VME->SendBUSY(OFF);
-        }
+        //     //Resume data taking - Release VETO signal
+        //     VME->SendBUSY(OFF);
+        // }
 
         //Increment the kill clock
         CKill_Clk++;
@@ -284,7 +284,7 @@ void DataReader::Run(){
 
     //Stop random trigger pulses if non efficiency run type
     if(runtype == "rate" || runtype == "noise_reference" || runtype == "test"){
-        VME->RDMTriggerPulse(OFF);
+        // VME->RDMTriggerPulse(OFF);
         MSG_INFO("[DAQ] Stopping random trigger pulses");
 
         long long acquisition_time = stopstamp-startstamp;

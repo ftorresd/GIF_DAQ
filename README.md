@@ -1,8 +1,38 @@
-# GIF++ DAQ v5.0
-#### Author: Alexis Fagot
-#### email : alexis.fagot@ugent.be
+# GIF++ DAQ v5.0 for IPBus
+#### Author: Felipe Silva (felipe.silva@cern.ch)
+#### Original Author: Alexis Fagot (alexis.fagot@ugent.be)
 
-## Compilation
+## Development Env
+
+### Build
+
+```
+docker build -t gif_daq_dev_env docker/dev_env
+```
+
+### Run Development Env
+
+```
+docker run -v `pwd`:/gif_daq -v `pwd`/buffer_zone/operation:/var/operation/RUN -v `pwd`/buffer_zone/webdcs:/var/webdcs/HVSCAN/ -it --rm gif_daq_dev_env
+```
+
+### Compile
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+### Run
+
+```
+./daq ../buffer_zone/outputs.txt
+```
+
+
+## Compilation (OLD BUT GOLD)
 
 This application requires 3 non-optional dependencies:
 
@@ -21,7 +51,7 @@ To compile the GIF++ DAQ project, simply do :
 
 You may want to erase and remake the build directory in between compilations to avoid problems (unless minor C++ code change).
 
-## Usage
+## Usage (OLD BUT GOLD)
 
 This data acquisition software is designed to acquire data in the new Gamma Irradiation Facility (GIF++) at CERN.
 In this facility, muon detector (Resistive Plate Chambers, Cathode Strip Chambers, Micromegas, Drift Tubes, Gas Electron Multipliers, etc...) performances are
