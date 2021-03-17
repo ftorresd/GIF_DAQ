@@ -573,13 +573,13 @@ Uint v1190a::Read(RAWData *DataList, int ntdcs){
 
         int EventCount = -99;
         int nHits = -88;
-        vector<int> TDCCh;
-        vector<float> TDCTS;
+        vector<int> BoardChannel;
+        vector<float> BoardTS;
 
-        TDCCh.clear();
-        TDCTS.clear();
+        BoardChannel.clear();
+        BoardTS.clear();
 
-        //Sometimes, the header is not weel read out in the buffer. To control this, the previous
+        //Sometimes, the header is not well read out in the buffer. To control this, the previous
         //good word having been read out to know when this happens. When this happens, the bool
         //Header stays at false.
         bool Header = false;
@@ -618,11 +618,11 @@ Uint v1190a::Read(RAWData *DataList, int ntdcs){
                         int tdc_offset = (Address[0] / BASEV1190A);
                         channel = ((words[w]>>TDC_MEASUR_CHAN_BIT_V1190A)
                                    & TDC_MEASUR_CHAN_V1190A) + (tdc+tdc_offset)*1000;
-                        TDCCh.push_back(channel);
+                        BoardChannel.push_back(channel);
 
                         timing = ((words[w]>>TDC_MEASUR_TIME_BIT_V1190A)
                                   & TDC_MEASUR_TIME_V1190A);
-                        TDCTS.push_back((float)timing/10.);
+                        BoardTS.push_back((float)timing/10.);
 
                         break;
                     }
@@ -642,7 +642,7 @@ Uint v1190a::Read(RAWData *DataList, int ntdcs){
                         if(!Header) break;
                         //The global trailer is the very last word of an event. At that
                         //point the number of hits in the event is known.
-                        nHits = TDCTS.size();
+                        nHits = BoardTS.size();
 
                         //Put all the data in the RAWData lists
 
@@ -704,8 +704,8 @@ Uint v1190a::Read(RAWData *DataList, int ntdcs){
                                 DataList->EventList->push_back(EventCount);
                                 DataList->NHitsList->push_back(nHits);
                                 DataList->QFlagList->push_back(qflag_offset*GOOD);
-                                DataList->ChannelList->push_back(TDCCh);
-                                DataList->TimeStampList->push_back(TDCTS);
+                                DataList->ChannelList->push_back(BoardChannel);
+                                DataList->TimeStampList->push_back(BoardTS);
                             } else {
                                 string tdcnumber = intTostring(tdc);
                                 MSG_ERROR("[TDC"+tdcnumber+"-ERROR] Event error Type 1");
@@ -720,8 +720,8 @@ Uint v1190a::Read(RAWData *DataList, int ntdcs){
 
                                 DataList->NHitsList->at(it) = DataList->NHitsList->at(it) + nHits;
                                 DataList->QFlagList->at(it) = DataList->QFlagList->at(it) + qflag_offset*GOOD;
-                                DataList->ChannelList->at(it).insert(DataList->ChannelList->at(it).end(),TDCCh.begin(),TDCCh.end());
-                                DataList->TimeStampList->at(it).insert(DataList->TimeStampList->at(it).end(),TDCTS.begin(),TDCTS.end());
+                                DataList->ChannelList->at(it).insert(DataList->ChannelList->at(it).end(),BoardChannel.begin(),BoardChannel.end());
+                                DataList->TimeStampList->at(it).insert(DataList->TimeStampList->at(it).end(),BoardTS.begin(),BoardTS.end());
                             } else {
                                 string tdcnumber = intTostring(tdc);
                                 MSG_ERROR("[TDC"+tdcnumber+"-ERROR] Event error Type 2");
@@ -740,8 +740,8 @@ Uint v1190a::Read(RAWData *DataList, int ntdcs){
                         //The reinitialise our temporary variables
                         EventCount = -99;
                         nHits = -88;
-                        TDCCh.clear();
-                        TDCTS.clear();
+                        BoardChannel.clear();
+                        BoardTS.clear();
 
                         break;
                     }

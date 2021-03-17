@@ -1,6 +1,7 @@
 buffer_zone/*
 build/
 bin/
+.DS_Store
 
 # Prerequisites
 *.d

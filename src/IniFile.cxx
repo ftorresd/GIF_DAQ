@@ -218,8 +218,7 @@ long IniFile::intType(string groupname, string keyname, long defaultvalue ){
         }
 
         intValue = strtol(fileValue.c_str(),NULL,base);
-    }
-    else {
+    } else {
         string defVal = longTostring(defaultvalue);
         MSG_WARNING("[IniFile-WARING] "+key+" could not be found : default key used instead ("+defVal+")");
     }

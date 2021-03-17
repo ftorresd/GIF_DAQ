@@ -37,7 +37,7 @@ using namespace std;
 
 /*** Base address (A32) of the model V1190A ***/
 
-const Uint MINNTDC = 1;
+const Uint MINNBOARDS = 1;
 const Data32 BASEV1190A = 0x11110000;
 
 // ****************************************************************************************************

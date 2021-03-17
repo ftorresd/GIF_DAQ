@@ -15,11 +15,13 @@
 #include <TTree.h>
 
 
-// #include "v1190a.h"
-// #include "v1718.h"
+// #include "crate.h"
+// #include "be_board.h"
 
 #include "utils.h"
 #include "IniFile.h"
+
+#include "uhal/uhal.hpp"
 
 using namespace std;
 
@@ -34,7 +36,7 @@ struct RAWData{
 
 // Definitions
 const Uint MAXTRIGGERS = 1000;
-const Uint MINNTDC = 1;
+const Uint MINNBOARDS = 1;
 
 typedef enum _QualityFlag {
     GOOD      = 1,
@@ -46,10 +48,11 @@ class DataReader
         bool     StopFlag;
         IniFile *iniFile;
         Data32   MaxTriggers;
-        // v1718   *VME;
-        int      nTDCs;
-        // v1190a  *TDCs;
-        RAWData  TDCData;
+        RAWData  BoardData;
+        uhal::ConnectionManager *ConnectionManager;
+        int nBoards;
+        vector<uhal::HwInterface> *BEBoards;
+        
 
     public:
         DataReader();
@@ -57,8 +60,8 @@ class DataReader
         void     SetIniFile(string inifilename);
         void     SetMaxTriggers();
         Data32   GetMaxTriggers();
-        void     SetVME();
-        void     SetTDC();
+        void     SetCrate(string ConnectionFilePath);
+        void     SetBEBoard();
         int      GetQFlag(Uint it);
         void     Init(string inifilename);
         void     FlushBuffer();

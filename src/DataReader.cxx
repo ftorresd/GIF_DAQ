@@ -18,24 +18,26 @@
 #include "../include/MsgSvc.h"
 #include "../include/utils.h"
 
+#include "uhal/uhal.hpp"
+
 using namespace std;
 
 // ****************************************************************************************************
 
 DataReader::DataReader(){
     //Initialisation of the RAWData vectors
-    TDCData.EventList = new vector<int>;
-    TDCData.NHitsList = new vector<int>;
-    TDCData.QFlagList = new vector<int>;
-    TDCData.ChannelList = new vector< vector<int> >;
-    TDCData.TimeStampList = new vector< vector<float> >;
+    BoardData.EventList = new vector<int>;
+    BoardData.NHitsList = new vector<int>;
+    BoardData.QFlagList = new vector<int>;
+    BoardData.ChannelList = new vector< vector<int> >;
+    BoardData.TimeStampList = new vector< vector<float> >;
 
     //Cleaning all the vectors
-    TDCData.EventList->clear();
-    TDCData.NHitsList->clear();
-    TDCData.QFlagList->clear();
-    TDCData.ChannelList->clear();
-    TDCData.TimeStampList->clear();
+    BoardData.EventList->clear();
+    BoardData.NHitsList->clear();
+    BoardData.QFlagList->clear();
+    BoardData.ChannelList->clear();
+    BoardData.TimeStampList->clear();
 
     StopFlag = false;
 }
@@ -67,25 +69,34 @@ Data32 DataReader::GetMaxTriggers(){
 
 // ****************************************************************************************************
 
-void DataReader::SetVME(){
+void DataReader::SetCrate(string ConnectionFilePath){
     // VME = new v1718(iniFile);
+    ConnectionManager = new uhal::ConnectionManager(ConnectionFilePath);
 }
 
 // ****************************************************************************************************
 
-void DataReader::SetTDC(){
-    nTDCs = iniFile->intType("General","Tdcs",MINNTDC);
-    // TDCs = new v1190a(VME->GetHandle(),iniFile,nTDCs);
+void DataReader::SetBEBoard(){
+    nBoards = iniFile->intType("General","Boards",MINNBOARDS);
+    // TDCs = new v1190a(VME->GetHandle(),iniFile,nBoards);
 
     // /*********** initialize the TDC 1190a ***************************/
-    // TDCs->Set(iniFile,nTDCs);
+    // TDCs->Set(iniFile,nBoards);
+    BEBoards = new vector<uhal::HwInterface>;
+    BEBoards->clear();
+
+    for(int board=0; board<nBoards; board++){
+        char groupname[10];
+        sprintf(groupname,"Board%i",board);
+        BEBoards->push_back(ConnectionManager->getDevice(iniFile->stringType(groupname,"Id","DUMMY"))); 
+    }
 }
 
 // ****************************************************************************************************
 
 int DataReader::GetQFlag(Uint it){
-    int flag = TDCData.QFlagList->at(it);
-    int nDigits = nTDCs;
+    int flag = BoardData.QFlagList->at(it);
+    int nDigits = nBoards;
 
     int tmpflag = flag;
     while(nDigits != 0){
@@ -105,8 +116,8 @@ int DataReader::GetQFlag(Uint it){
 void DataReader::Init(string inifilename){
     SetIniFile(inifilename);
     SetMaxTriggers();
-    SetVME();
-    SetTDC();
+    SetCrate(iniFile->stringType("General","CrateAddress","file://config/uhal/connections.xml"));
+    SetBEBoard();
 }
 
 // ****************************************************************************************************
@@ -120,7 +131,7 @@ void DataReader::Update(){
 
 void DataReader::FlushBuffer(){
     // VME->SendBUSY(ON);
-    // TDCs->Clear(nTDCs);
+    // TDCs->Clear(nBoards);
     // VME->SendBUSY(OFF);
 }
 
@@ -191,37 +202,37 @@ void DataReader::Run(){
 
     //Create the data tree where the data will be saved
     //For each entry will be saved the event tag, the number of hits recorded
-    //in the TDCs, the list of fired TDC channels and the time stamps of the
+    //in the Boards, the list of fired board channels and the time stamps of the
     //hits.
     TTree *RAWDataTree = new TTree("RAWData","RAWData");
 
     int           EventCount = -9;  //Event tag
     int           nHits = -8;       //Number of fired TDC channels in event
     int           qflag = -7;       //Event quality flag (0 = CORRUPTED | 1 = GOOD)
-    vector<int>   TDCCh;            //List of fired TDC channels in event
-    vector<float> TDCTS;           //list of fired TDC channels leading time stamps
+    vector<int>   BoardChannel;            //List of fired TDC channels in event
+    vector<float> BoardTS;           //list of fired TDC channels leading time stamps
 
-    TDCCh.clear();
-    TDCTS.clear();
+    BoardChannel.clear();
+    BoardTS.clear();
 
     //Set the branches that will contain the previously defined variables
     RAWDataTree->Branch("EventNumber",    &EventCount, "EventNumber/I");
     RAWDataTree->Branch("number_of_hits", &nHits,      "number_of_hits/I");
     RAWDataTree->Branch("Quality_flag",   &qflag,      "Quality_flag/I");
-    RAWDataTree->Branch("TDC_channel",    &TDCCh);
-    RAWDataTree->Branch("TDC_TimeStamp",  &TDCTS);
+    RAWDataTree->Branch("TDC_channel",    &BoardChannel);
+    RAWDataTree->Branch("TDC_TimeStamp",  &BoardTS);
 
     //Cleaning all the vectors that will contain the data
-    TDCData.EventList->clear();
-    TDCData.NHitsList->clear();
-    TDCData.QFlagList->clear();
-    TDCData.ChannelList->clear();
-    TDCData.TimeStampList->clear();
+    BoardData.EventList->clear();
+    BoardData.NHitsList->clear();
+    BoardData.QFlagList->clear();
+    BoardData.ChannelList->clear();
+    BoardData.TimeStampList->clear();
 
     //Clear all the buffers that can have started to be filled
     //by incoming triggers and start data taking. If non efficiency
     //tun type, turn ON trigger pulse.
-    FlushBuffer();
+    FlushBuffer(); // FIXME
     TString runtype = iniFile->stringType("General","RunType","");
     if(runtype == "rate" || runtype == "noise_reference" || runtype == "test"){
         // VME->RDMTriggerPulse(ON);
@@ -252,7 +263,7 @@ void DataReader::Run(){
         //     VME->SendBUSY(ON);
 
         //     //Read the data
-        //     TriggerCount = TDCs->Read(&TDCData,nTDCs);
+        //     TriggerCount = TDCs->Read(&BoardData,nBoards);
 
         //     //percentage update
         //     percentage = (100*TriggerCount) / GetMaxTriggers();
@@ -299,12 +310,12 @@ void DataReader::Run(){
     //Write the data from the RAWData structure to the TTree and
     //change the QFlag digits that are equal to 0, to 2 for later
     //offline analysis.
-    for(Uint i=0; i<TDCData.EventList->size(); i++){
-        EventCount  = TDCData.EventList->at(i);
-        nHits       = TDCData.NHitsList->at(i);
+    for(Uint i=0; i<BoardData.EventList->size(); i++){
+        EventCount  = BoardData.EventList->at(i);
+        nHits       = BoardData.NHitsList->at(i);
         qflag       = GetQFlag(i);
-        TDCCh       = TDCData.ChannelList->at(i);
-        TDCTS       = TDCData.TimeStampList->at(i);
+        BoardChannel       = BoardData.ChannelList->at(i);
+        BoardTS       = BoardData.TimeStampList->at(i);
 
         RAWDataTree->Fill();
     }
