@@ -13,23 +13,25 @@ docker build -t gif_daq_dev_env docker/dev_env
 ### Run Development Env
 
 ```
-docker run -v `pwd`:/gif_daq -v `pwd`/buffer_zone/operation:/var/operation/RUN -v `pwd`/buffer_zone/webdcs:/var/webdcs/HVSCAN/ -it --rm gif_daq_dev_env
+docker run --name gif_daq -v `pwd`:/gif_daq -v `pwd`/buffer_zone/operation:/var/operation/RUN -v `pwd`/buffer_zone/webdcs:/var/webdcs/HVSCAN/ -it --rm gif_daq_dev_env
 ```
 
 ### Compile
 
 ```
-mkdir build
 cd build
 cmake ..
-make
+make install
+cd ..
 ```
 
 ### Run
 
 ```
-./daq ../buffer_zone/outputs.txt
+bin/daq buffer_zone/outputs.txt
 ```
+
+##
 
 
 ## Compilation (OLD BUT GOLD)

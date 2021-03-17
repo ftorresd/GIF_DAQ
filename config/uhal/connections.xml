@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<connections>
+  <connection id="dummy.udp" uri="ipbusudp-2.0://localhost:50001" address_table="file://address_table.xml" />
+  <!-- <connection id="dummy.tcp.0"        uri="ipbustcp-2.0://localhost:50002"                     address_table="file://dummy_address.xml" /> -->
+  <!-- <connection id="dummy.controlhub.0" uri="chtcp-2.0://localhost:10203?target=127.0.0.1:50001" address_table="file://dummy_address.xml" /> -->
+</connections>

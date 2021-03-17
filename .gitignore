@@ -1,5 +1,6 @@
 buffer_zone/*
 build/
+bin/
 
 # Prerequisites
 *.d
